@@ -10,7 +10,7 @@ namespace DialPortal.Controllers
             return View();
         }
         [HttpGet]
-        public async Task<IActionResult> CdrListData(string startDate, string endDate, string direction, string status)
+        public async Task<IActionResult> CdrListData(string startDate, string endDate)
         {
             var username = HttpContext.Session.GetString("username");
             var password = HttpContext.Session.GetString("password");
@@ -34,20 +34,8 @@ namespace DialPortal.Controllers
             using (var client = new HttpClient())
             {
                 var apiUrl = $"https://www.015pbx.net/local/api/json/cdrs/list/?auth_username={username}&auth_password={password}&start={startTimestamp}&end={endTimestamp}";
-
                 // Append call type to API URL if provided
-                if (!string.IsNullOrEmpty(direction))
-                {
-                    apiUrl += $"&direction={direction}";
-                }
-
-                if (!string.IsNullOrEmpty(status))
-                {
-                    apiUrl += $"&status={status}";
-                }
-
                 var request = new HttpRequestMessage(HttpMethod.Get, apiUrl);
-
                 try
                 {
                     var response = await client.SendAsync(request);

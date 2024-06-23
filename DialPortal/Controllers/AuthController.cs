@@ -29,7 +29,7 @@ namespace DialPortal.Controllers
             {
                 HttpContext.Session.SetString("username", username);
                 HttpContext.Session.SetString("password", password);
-                return RedirectToAction("CdrsList", "Calls"); // Redirect to Home page after successful login
+                return RedirectToAction("Index", "CallHistory"); // Redirect to Home page after successful login
             }
 
             ViewBag.Error = "Invalid credentials";

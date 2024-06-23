@@ -13,7 +13,7 @@
         <div class="row">
             <div class="col-lg-12">
                 <div class="card info-card sales-card p-3">
-                    <form method="post">
+                    <form id="cdrForm" class="needs-validation" novalidate>
                         <div class="row">
                             <div class="col-md-5">
                                 <label for="startDate">Start Date</label>
@@ -82,3 +82,31 @@
         </div>
     </section>
 </main><!-- End #main -->
+
+@section Scripts{
+    <script>
+        $(document).ready(function () {
+            $("#cdrForm").on('submit', function (event) {
+                event.preventDefault();
+                const startDate = $('#startDate').val();
+                const endDate = $('#endDate').val();
+                if (new Date(startDate) > new Date(endDate)) {
+                    Swal.fire({
+                        icon: 'error',
+                        title: 'Invalid Date Range',
+                        text: 'Start date cannot be greater than end date.',
+                    });
+                    return;
+                }
+                let apiUrl = `/CallHistory/CdrListData?startDate=${startDate}&endDate=${endDate}`;
+                $.ajax({
+                    url:apiUrl,
+                    type:"GET",
+                    success: function (data){
+                        console.log(data);
+                    }
+                })
+            });
+        });
+    </script>
+}
