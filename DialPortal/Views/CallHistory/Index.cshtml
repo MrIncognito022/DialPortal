@@ -85,7 +85,8 @@
 
 @section Scripts{
     <script>
-        $(document).ready(function () {
+        $(document).ready(function () {\
+            const missedCalls;
             $("#cdrForm").on('submit', function (event) {
                 event.preventDefault();
                 const startDate = $('#startDate').val();
@@ -100,12 +101,29 @@
                 }
                 let apiUrl = `/CallHistory/CdrListData?startDate=${startDate}&endDate=${endDate}`;
                 $.ajax({
-                    url:apiUrl,
-                    type:"GET",
-                    success: function (data){
-                        console.log(data);
+                    url: apiUrl,
+                    type: "GET",
+                    success: function (data) {
+                        data = JSON.parse(data.data)
+                        findMetricsFromData(data);
+                    },
+                    error: function (xhr, status, error) {
+                        Swal.fire({
+                            icon: 'error',
+                            title: 'Fetch Error',
+                            text: 'Error fetching data: ' + error,
+                        });
                     }
-                })
+                });
+
+                function findMetricsFromData(data){
+                    missedCalls = countMissedCalls(data);
+                    console.log(`Number of missed calls: ${missedCalls}`);
+                }
+                function countMissedCalls(data) {
+                    return data.data.filter(call => call.status !== "answer" && call.status !== "cancel").length;
+                }
+
             });
         });
     </script>
