@@ -38,15 +38,15 @@
     </section>
 
     <section class="section dashboard">
-       <div class="row">
-           <div class="col-3">
+        <div class="row">
+            @* missed calls started *@
+            <div class="col-3">
                 <div class="card info-card revenue-card">
                     <div class="card-body">
                         <h5 class="card-title">Calls <span>| Missed</span></h5>
-
                         <div class="d-flex align-items-center">
                             <div class="card-icon rounded-circle d-flex align-items-center justify-content-center">
-                                <i class="bi bi-telephone-x"></i>
+                                <i class="bi bi-telephone-x text-danger"></i>
                             </div>
                             <div class="ps-3">
                                 <h6 id="missedCallFigure"></h6>
@@ -56,14 +56,15 @@
                     </div>
                 </div>
             </div>
+            @* missed calls ended----------------------- *@
+            @* Answered calls started *@
             <div class="col-3">
                 <div class="card info-card revenue-card">
                     <div class="card-body">
                         <h5 class="card-title">Calls <span>| Answered</span></h5>
-
                         <div class="d-flex align-items-center">
                             <div class="card-icon rounded-circle d-flex align-items-center justify-content-center">
-                                <i class="bi bi-telephone-x"></i>
+                                <i class="bi bi-telephone text-success"></i>
                             </div>
                             <div class="ps-3">
                                 <h6 id="answeredCallFigure"></h6>
@@ -73,6 +74,7 @@
                     </div>
                 </div>
             </div>
+            @* Answered calls Ended -------------------- *@
             <div class="col-3">
                 <div class="card info-card revenue-card">
                     <div class="card-body">
@@ -84,20 +86,55 @@
                             <div class="ps-3">
                                 <h6>26</h6>
                                 <span class="text-success small pt-1 fw-bold">8%</span> <span class="text-muted small pt-2 ps-1">increase</span>
-
                             </div>
                         </div>
                     </div>
                 </div>
             </div>
+            @* Recent calls Starts *@
+            <div class="col-3">
+                <div class="card">
+                    <div class="card-body">
+                        <h5 class="card-title">Recent Calls <span>|</span></h5>
+                        <div class="activity" id="recentCallActivity">
+                        </div>
+
+                    </div>
+                </div><!-- End Recent Activity -->
+            </div>
+            @* Recent Calls Ends-------------------------*@
         </div>
+      
+        <!-- Call Details DataTable -->
+        <div class="col-12">
+            <div class="card recent-sales overflow-auto">
+                <div class="card-body">
+                    <h5 class="card-title">Call History</h5>
+                    <table id="callDetailsDataTable" class="table table-borderless datatable">
+                        <thead>
+                            <tr>
+                                <th scope="col">Customer</th>
+                                <th scope="col">Caller Number</th>
+                                <th scope="col">Start Time</th>
+                                <th scope="col">End Time</th>
+                                <th scope="col">Duration</th>
+                                <th scope="col">Status</th>
+                                <th scope="col">Cost</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <!-- Data will be populated here -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div><!-- End Recent Sales -->
+        <!-- End Call Details Datatable -->
     </section>
 </main><!-- End #main -->
-
-@section Scripts{
+@section Scripts {
     <script>
         $(document).ready(function () {
-            
             $("#cdrForm").on('submit', function (event) {
                 event.preventDefault();
                 const startDate = $('#startDate').val();
@@ -117,6 +154,8 @@
                     success: function (data) {
                         data = JSON.parse(data.data)
                         findMetricsFromData(data);
+                        populateDataTable(data);
+
                     },
                     error: function (xhr, status, error) {
                         Swal.fire({
@@ -126,20 +165,85 @@
                         });
                     }
                 });
-                function findMetricsFromData(data){
+
+                function findMetricsFromData(data) {
                     const missedCalls = countMissedCalls(data);
-                    const AnsweredCalls = countAnsweredCalls(data);
+                    const answeredCalls = countAnsweredCalls(data);
                     document.getElementById("missedCallFigure").innerHTML = missedCalls;
-                    document.getElementById("answeredCallFigure").innerHTML = AnsweredCalls;
-                    console.log(`Number of missed calls: ${missedCalls}`);
+                    document.getElementById("answeredCallFigure").innerHTML = answeredCalls;
+                    const recentCalls = extractRecentCalls(data, 10); // Get the 10 most recent calls
+                    $("#recentCallActivity").empty(); // Clear previous recent calls
+                    recentCalls.forEach(call => {
+                        console.log(`Caller Number: ${call.callerNumber}, Duration: ${call.duration}`);
+                        $("#recentCallActivity").append(`
+                                    <div class="activity-item d-flex">
+                                        <div class="activite-label">${call.duration} Sec</div>
+                                        <i class='bi bi-circle-fill activity-badge text-primary align-self-start'></i>
+                                        <div class="activity-content">${call.callerNumber}</div>
+                                    </div><!-- End activity item-->
+                                `);
+                    });
                 }
+
                 function countMissedCalls(data) {
                     return data.data.filter(call => call.status !== "answer" && call.status !== "cancel").length;
                 }
+
                 function countAnsweredCalls(data) {
-                    return data.data.filter(call => call.status == "answer").length;
+                    return data.data.filter(call => call.status === "answer").length;
                 }
+
+                function extractRecentCalls(data, count) {
+                    const recentCalls = data.data
+                        .sort((a, b) => b.start - a.start) // Sort by start time in descending order
+                        .slice(0, count); // Get the first 'count' calls
+
+                    return recentCalls.map(call => ({
+                        callerNumber: call.callerid_external,
+                        duration: call.talktime
+                    }));
+                }
+
+                function populateDataTable(data) {
+                    const dataTable = $('#callDetailsDataTable').DataTable();
+                    dataTable.clear().draw(); // Clear existing rows
+
+                    data.data.forEach(call => {
+                        const startDateTime = new Date(call.start * 1000).toLocaleString();
+                        const endDateTime = new Date(call.end * 1000).toLocaleString();
+                        const duration = call.talktime; // assuming talktime is the call duration in seconds
+                        const cost = call.cost;
+
+                        // Determine badge class based on status
+                        let statusBadgeClass = '';
+                        switch (call.status) {
+                            case 'answer':
+                                statusBadgeClass = 'bg-success';
+                                break;
+                            case 'cancel':
+                                statusBadgeClass = 'bg-danger';
+                                break;
+                            default:
+                                statusBadgeClass = 'bg-secondary';
+                        }
+
+                        const row = `<tr>
+                            <th scope="row" class="text-primary">${call.customer_name}</td>
+                            <td>${call.callerid_external}</td>
+                            <td class="text-primary">${startDateTime}</td>
+                            <td class="text-primary">${endDateTime}</td>
+                            <td>${duration}</td>
+                            <td><span class="badge ${statusBadgeClass}">${call.status}</span></td>
+                            <td>${cost}</td>
+                        </tr>`;
+
+                        dataTable.row.add($(row)).draw();
+                    });
+                }
+
             });
         });
     </script>
 }
+
+
