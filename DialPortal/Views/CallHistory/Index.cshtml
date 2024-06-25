@@ -30,7 +30,7 @@
     <section class="section dashboard">
         <div class="row">
             <div class="col-lg-12">
-                <div class="card info-card sales-card p-3">
+                <div class="card p-3">
                     <form id="cdrForm" class="needs-validation" novalidate>
                         <div class="row">
                             <div class="col-md-5">
@@ -48,7 +48,7 @@
                                 </div>
                             </div>
                             <div class="col-md-2 ">
-                                <button type="submit" class="btn btn-primary" style="margin-top: 22px;">Submit</button>
+                                <button type="submit" class="btn btn-primary  w-100" style="margin-top: 22px;">Submit</button>
                             </div>
                         </div>
                     </form>
@@ -68,7 +68,7 @@
                                 <h5 class="card-title">Calls <span>| Missed</span></h5>
                                 <div class="d-flex align-items-center">
                                     <div class="card-icon rounded-circle d-flex align-items-center justify-content-center">
-                                        <i class="bi bi-telephone-x text-danger"></i>
+                                        <i class="bi bi-telephone-plus-fill text-primary"></i>
                                     </div>
                                     <div class="ps-3">
                                         <h6 id="missedCallFigure"></h6>
@@ -86,7 +86,7 @@
                                 <h5 class="card-title">Calls <span>| Answered</span></h5>
                                 <div class="d-flex align-items-center">
                                     <div class="card-icon rounded-circle d-flex align-items-center justify-content-center">
-                                        <i class="bi bi-telephone text-success"></i>
+                                        <i class="bi bi-telephone-fill text-success"></i>
                                     </div>
                                     <div class="ps-3">
                                         <h6 id="answeredCallFigure"></h6>
@@ -104,7 +104,7 @@
                                 <h5 class="card-title">Calls <span>| Cancel</span></h5>
                                 <div class="d-flex align-items-center">
                                     <div class="card-icon rounded-circle d-flex align-items-center justify-content-center">
-                                        <i class="bi bi-telephone-x"></i>
+                                        <i class="bi bi-telephone-x-fill text-danger"></i>
                                     </div>
                                     <div class="ps-3">
                                         <h6 id="cancelCallFigure"></h6>
@@ -194,6 +194,7 @@
                 const startDate = $('#startDate').val();
                 const endDate = $('#endDate').val();
                 if (new Date(startDate) > new Date(endDate)) {
+                    $('#overlay').hide();
                     Swal.fire({
                         icon: 'error',
                         title: 'Invalid Date Range',
@@ -212,6 +213,7 @@
                         populateDataTable(data);
                     },
                     error: function (xhr, status, error) {
+                        $('#overlay').hide();
                         Swal.fire({
                             icon: 'error',
                             title: 'Fetch Error',
@@ -335,11 +337,11 @@
 
                     const row = `<tr>
                                 <th scope="row" class="text-primary">${call.customer_name}</td>
-                                <td>${call.callerid_external}</td>
-                                <td class="text-primary">${startDateTime}</td>
-                                <td class="text-primary">${endDateTime}</td>
-                                <td>${duration}</td>
-                                <td><span class="badge ${statusBadgeClass}">${call.status}</span></td>
+                                        <td  class="text-center" >${call.callerid_external}</td>
+                                <td class="text-center">${startDateTime}</td>
+                                        <td class="text-center">${endDateTime}</td>
+                                        <td  class="text-center">${duration}</td>
+                                                <td><span class="badge text-center ${statusBadgeClass}">${call.status}</span></td>
                                 <td>${cost}</td>
                             </tr>`;
 
