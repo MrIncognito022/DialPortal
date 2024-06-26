@@ -1,6 +1,6 @@
-﻿namespace DialPortal.Models.CommentsViewModels
+﻿namespace DialPortal.Models
 {
-    public class EditCommentViewModel
+    public class EditCommentsViewModel
     {
         public int CommentsId { get; set; }
         public string UniqueId { get; set; }

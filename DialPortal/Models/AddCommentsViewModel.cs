@@ -1,4 +1,4 @@
-﻿namespace DialPortal.Models.CommentsViewModels
+﻿namespace DialPortal.Models
 {
     public class AddCommentsViewModel
     {
