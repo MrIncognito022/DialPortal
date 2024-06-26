@@ -25,6 +25,7 @@ namespace DialPortal.Controllers
 
             var validUser = userCredentials.Find(user => user.Username == username && user.Password == password);
 
+
             if (validUser != null)
             {
                 HttpContext.Session.SetString("username", username);
