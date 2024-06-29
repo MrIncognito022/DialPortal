@@ -1,4 +1,4 @@
-﻿namespace DialPortal.Models.Domain
+﻿namespace DialPortal.Models
 {
     public class PhoneDataModel
     {
