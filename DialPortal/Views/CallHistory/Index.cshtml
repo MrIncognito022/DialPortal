@@ -180,10 +180,17 @@
         function hideOverlay() {
             $('#overlay').hide();
         }
+
         $(document).ready(function () {
             $('#overlay').hide();
-            // Fetch data when the page loads
-             // fetchData();
+
+            // Check if there is data in localStorage when the page loads
+            const storedData = localStorage.getItem('callData');
+            if (storedData) {
+                const parsedData = JSON.parse(storedData);
+                findMetricsFromData(parsedData);
+                populateDataTable(parsedData);
+            }
 
             $("#cdrForm").on('submit', function (event) {
                 event.preventDefault();
@@ -195,7 +202,7 @@
                 const startDate = $('#startDate').val();
                 const endDate = $('#endDate').val();
                 if (new Date(startDate) > new Date(endDate)) {
-                    $('#overlay').hide();
+                    hideOverlay();
                     Swal.fire({
                         icon: 'error',
                         title: 'Invalid Date Range',
@@ -208,13 +215,15 @@
                     url: apiUrl,
                     type: "GET",
                     success: function (data) {
-                        hideOverlay()
-                        data = JSON.parse(data.data);
-                        findMetricsFromData(data);
-                        populateDataTable(data);
+                        hideOverlay();
+                        const parsedData = JSON.parse(data.data);
+                        // Store the fetched data in localStorage
+                        localStorage.setItem('callData', JSON.stringify(parsedData));
+                        findMetricsFromData(parsedData);
+                        populateDataTable(parsedData);
                     },
                     error: function (xhr, status, error) {
-                        $('#overlay').hide();
+                        hideOverlay();
                         Swal.fire({
                             icon: 'error',
                             title: 'Fetch Error',
@@ -232,17 +241,17 @@
                 document.getElementById("missedCallFigure").innerHTML = missedCalls;
                 document.getElementById("answeredCallFigure").innerHTML = answeredCalls;
                 document.getElementById("cancelCallFigure").innerHTML = cancelCalls;
-                const recentCalls = extractRecentCalls(data, 14); // Get the 10 most recent calls
+                const recentCalls = extractRecentCalls(data, 14); // Get the 14 most recent calls
                 $("#recentCallActivity").empty(); // Clear previous recent calls
                 recentCalls.forEach(call => {
                     console.log(`Caller Number: ${call.callerNumber}, Duration: ${call.duration}`);
                     $("#recentCallActivity").append(`
-                                <div class="activity-item d-flex">
-                                    <div class="activite-label">${call.duration} Sec</div>
-                                    <i class='bi bi-circle-fill activity-badge text-primary align-self-start'></i>
-                                    <div class="activity-content">${call.callerNumber}</div>
-                                </div><!-- End activity item-->
-                            `);
+                                        <div class="activity-item d-flex">
+                                            <div class="activite-label">${call.duration} Sec</div>
+                                            <i class='bi bi-circle-fill activity-badge text-primary align-self-start'></i>
+                                            <div class="activity-content">${call.callerNumber}</div>
+                                        </div><!-- End activity item-->
+                                    `);
                 });
             }
 
@@ -337,14 +346,14 @@
                     }
 
                     const row = `<tr>
-                                <th scope="row" class="text-primary">${call.customer_name}</td>
-                                        <td  class="text-center" >${call.callerid_external}</td>
-                                <td class="text-center">${startDateTime}</td>
-                                        <td class="text-center">${endDateTime}</td>
-                                        <td  class="text-center">${duration}</td>
-                                                <td><span class="badge text-center ${statusBadgeClass}">${call.status}</span></td>
-                                <td>${cost}</td>
-                            </tr>`;
+                                        <th scope="row" class="text-primary">${call.customer_name}</td>
+                                                <td  class="text-center" >${call.callerid_external}</td>
+                                        <td class="text-center">${startDateTime}</td>
+                                                <td class="text-center">${endDateTime}</td>
+                                                <td  class="text-center">${duration}</td>
+                                                        <td><span class="badge text-center ${statusBadgeClass}">${call.status}</span></td>
+                                        <td>${cost}</td>
+                                    </tr>`;
 
                     dataTable.row.add($(row)).draw();
                 });
@@ -353,5 +362,3 @@
 
     </script>
 }
-
-
